@@ -143,11 +143,12 @@ class TransformerMemory:
 
 
 class DualSubstrateMemory:
-    def __init__(self, dim: int = 128, cycle: int = 900) -> None:
+    def __init__(self, dim: int = 128, cycle_minutes: float = 15.0) -> None:
         self.continuous = ContinuousCache(dim)
         self.discrete = PrimeLedger()
         self.symbol_to_index: Dict[str, int] = {}
-        self.cycle = cycle
+        self.cycle_minutes = cycle_minutes
+        self.cycle_steps = 0
         self.step = 0
 
     def observe(self, symbol: str, truth: float) -> None:
@@ -161,7 +162,7 @@ class DualSubstrateMemory:
         if truth >= 0.5:
             self.discrete.write(symbol)
         self.step += 1
-        if self.cycle and self.step % self.cycle == 0:
+        if self.cycle_steps and self.step % self.cycle_steps == 0:
             perm = list(range(self.continuous.dim))
             random.shuffle(perm)
             self.continuous.x = [self.continuous.x[perm[i]] for i in range(self.continuous.dim)]
@@ -173,7 +174,10 @@ class DualSubstrateMemory:
         return self.continuous.expect(idx), self.discrete.check(symbol)
 
     def energy(self) -> float:
-        return self.continuous.energy() + float(self.discrete.size)
+        continuous_energy = self.continuous.energy()
+        size = self.discrete.size
+        discrete_penalty = math.log(size + 1) / 1000.0 if size else 0.0
+        return continuous_energy + discrete_penalty
 
 
 # ---------------------------------------------------------------------------
@@ -207,6 +211,9 @@ def simulate_memory(
     seen: Dict[str, int] = {}
     snapshots: List[MetricSnapshot] = []
 
+    if isinstance(memory, DualSubstrateMemory):
+        memory.cycle_steps = int(memory.cycle_minutes * tokens_per_minute) if memory.cycle_minutes else 0
+
     for t, symbol in enumerate(_symbol_sequence(42, names, steps), start=1):
         count = seen.get(symbol, 0)
         truth = 1.0 if count == 0 else 0.7
@@ -215,11 +222,11 @@ def simulate_memory(
         memory.observe(symbol, truth)
 
         if isinstance(memory, DualSubstrateMemory):
-            expected, ledger_flag = memory.query(symbol)
-            recall_flag = 1.0 if (ledger_flag or expected >= recall_threshold) else 0.0
+            expected, _ = memory.query(symbol)
         else:
             expected = memory.query(symbol)
-            recall_flag = 1.0 if expected >= recall_threshold else 0.0
+
+        recall_flag = 1.0 if expected >= recall_threshold else 0.0
 
         drift = abs(expected - truth)
         energy = memory.energy()
@@ -234,11 +241,11 @@ def compare_models(
     duration_minutes: int = 25,
     tokens_per_minute: int = 60,
     dim: int = 128,
-    cycle: int = 900,
+    cycle_minutes: float = 15.0,
 ) -> Dict[str, List[MetricSnapshot]]:
     random.seed(1234)
     transformer = TransformerMemory(dim=dim)
-    dual = DualSubstrateMemory(dim=dim, cycle=cycle)
+    dual = DualSubstrateMemory(dim=dim, cycle_minutes=cycle_minutes)
 
     return {
         "Grok + transformers": simulate_memory(
@@ -252,4 +259,3 @@ def compare_models(
             tokens_per_minute=tokens_per_minute,
         ),
     }
-
