@@ -1,0 +1,5 @@
+continuous_dim,cycle,drift_rate,elapsed_s,ledger_bits,log_path,model,ops,ops_proxy,recall@1,retention_half_life,shuffle,step,symbols,tokens,tokens_per_s,type
+,900,0.0,0.0018541812896728516,,logs/baseline_transformer_20251011T162206Z.jsonl,baseline_transformer,,4578.0,0.8,300,True,,12,620,334379.38536710816,summary
+128,,1.0,,3663,logs/demo.jsonl,dual_substrate_demo,119635968,,0.0,300,,1212,12,1200,,summary
+,900,0.0,1.4436814785003662,,logs/dual_substrate_20251011T162200Z.jsonl,dual_substrate,,60293120,0.8,300,True,,12,620,429.45761183002026,summary
+,900,0.0,0.0019996166229248047,,logs/nolima_baseline_20251011T162209Z.jsonl,nolima_baseline,,4578.0,0.8,300,True,,12,620,310059.43483963277,summary
