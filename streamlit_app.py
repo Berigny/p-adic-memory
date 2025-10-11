@@ -45,18 +45,23 @@ def _snapshots_to_frame(results: Dict[str, Iterable[MetricSnapshot]]) -> pd.Data
 
 
 def _render_metric_chart(frame: pd.DataFrame, metric: str) -> None:
-    subset = frame[frame["metric"] == metric]
-    chart = (
+    subset = frame[frame["metric"] == metric].copy()
+    subset.sort_values(["model", "minute"], inplace=True)
+
+    line = (
         alt.Chart(subset)
-        .mark_line()
+        .mark_line(point=True)
         .encode(
-            x=alt.X("minute:Q", title="Minutes"),
-            y=alt.Y("value:Q", title=metric, stack=None),
+            x=alt.X("minute:Q", title="Minutes", sort="ascending"),
+            y=alt.Y("value:Q", title=metric),
             color=alt.Color("model:N", title="Configuration"),
-            tooltip=["minute", "value", "model"],
+            detail="model:N",
+            strokeDash=alt.StrokeDash("model:N", legend=None),
+            tooltip=[alt.Tooltip("minute:Q", title="Minute"), alt.Tooltip("value:Q", title=metric), alt.Tooltip("model:N", title="Model")],
         )
-        .interactive()
     )
+
+    chart = line.properties(height=300).interactive()
     st.altair_chart(chart, use_container_width=True)
 
 
