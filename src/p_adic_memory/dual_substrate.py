@@ -231,6 +231,8 @@ class DualSubstrate:
         self.continuous.gradient_step(idx, truth)
         if truth >= 0.5:
             self.ledger.write(symbol)
+        else:
+            self.ledger.delete(symbol)
         self.step += 1
         if self.enable_shuffle and self.cycle > 0 and self.step % self.cycle == 0:
             perm = list(range(self.dim))
