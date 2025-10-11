@@ -1,0 +1,20 @@
+[build-system]
+requires      = ["hatchling"]          # lightweight, fast
+build-backend = "hatchling.build"
+
+[project]
+name            = "p-adic-memory"
+version         = "0.1.0"
+description     = "25-min lossless conversational memory via ℝ×ℚₚ dual substrate"
+readme          = "README.md"
+authors         = [{name = "Your Name", email = "you@example.com"}]
+license         = {text = "Apache-2.0"}
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourhandle/p-adic-memory"
