@@ -181,6 +181,28 @@ class MetricSnapshot:
     energy: float
 
 
+def compare_models(
+    duration_minutes: int = 25,
+    tokens_per_minute: int = 60,
+) -> Dict[str, List[MetricSnapshot]]:
+    """Compare memory models over a simulated dialogue."""
+    models = {
+        "Grok + transformers": TransformerMemory(),
+        "Grok + dual substrate": DualSubstrateMemory(),
+    }
+    results: Dict[str, List[MetricSnapshot]] = {}
+    for name, model in models.items():
+        snapshots = []
+        for _, minute_snapshots in simulate_memory(
+            model,
+            duration_minutes=duration_minutes,
+            tokens_per_minute=tokens_per_minute,
+        ):
+            snapshots.extend(minute_snapshots)
+        results[name] = snapshots
+    return results
+
+
 def simulate_memory(
     memory: TransformerMemory | DualSubstrateMemory,
     *,
@@ -201,7 +223,7 @@ def simulate_memory(
     for t in range(1, steps + 1):
         symbol = rng.choice(names)
         count  = seen.get(symbol, 0)
-        truth  = 1.0 if count == 0 else 0.7
+        truth  = 1.0 if count == 0 else (0.7 if count < 3 else 0.2)
         seen[symbol] = count + 1
 
         memory.observe(symbol, truth)
