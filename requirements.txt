@@ -1,1 +1,1 @@
-# No external dependencies required.
+pytest>=7.0
