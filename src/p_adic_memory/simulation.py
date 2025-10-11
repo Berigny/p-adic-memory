@@ -1,161 +1,154 @@
-"""Simulation utilities for comparing transformer and dual-substrate memories."""
-
-from __future__ import annotations
-
-import math
-import random
+# ---------------------------------------------------------------------------
+# 1.  Prime pool + crash-safe ledger (up to 664 k symbols)
+# ---------------------------------------------------------------------------
+import pathlib, pickle, math, random
 from dataclasses import dataclass
-from typing import Dict, Iterable, Iterator, List, Sequence, Tuple
+from typing import Dict, List, Sequence, Tuple, Iterator
 
+PRIME_CACHE = pathlib.Path(__file__).with_suffix(".primes")
 
-# ---------------------------------------------------------------------------
-# Prime utilities and append-only ledger
-# ---------------------------------------------------------------------------
-
-def _prime_generator(limit: int = 100_000) -> List[int]:
-    """Generate a list of primes up to ``limit`` using a simple sieve."""
-
-    sieve = [True] * (limit + 1)
-    sieve[0:2] = [False, False]
-    for p in range(2, int(limit**0.5) + 1):
+def _load_primes() -> List[int]:
+    if PRIME_CACHE.exists():
+        return pickle.loads(PRIME_CACHE.read_bytes())
+    limit = 10_000_000                                   # 664 579 primes
+    sieve = bytearray(b"\x01") * (limit + 1)
+    sieve[0:2] = b"\x00\x00"
+    for p in range(2, int(limit ** 0.5) + 1):
         if sieve[p]:
-            step = p
-            start = p * p
-            sieve[start : limit + 1 : step] = [False] * ((limit - start) // step + 1)
-    return [i for i, is_prime in enumerate(sieve) if is_prime]
+            start, step = p * p, p
+            sieve[start :: step] = b"\x00" * ((limit - start) // step + 1)
+    primes = [i for i, is_p in enumerate(sieve) if is_p]
+    PRIME_CACHE.write_bytes(pickle.dumps(primes))
+    return primes
 
-
-_SMALL_PRIMES: Sequence[int] = _prime_generator()
+_SMALL_PRIMES: Sequence[int] = _load_primes()
 
 
 class PrimeLedger:
-    """Append-only ledger that maps symbols to unique primes."""
-
-    def __init__(self) -> None:
-        self._supply: Iterator[int] = iter(_SMALL_PRIMES)
+    __slots__ = ("_value", "_map", "_journal", "journal_path")
+    def __init__(self, journal_path: pathlib.Path | None = None):
         self._value: int = 1
-        self._map: Dict[str, int] = {}
-
-    @staticmethod
-    def _valuation(n: int, p: int) -> int:
-        if n == 0:
-            return 999
-        k = 0
-        while n % p == 0:
-            n //= p
-            k += 1
-        return k
+        self._map: dict[str, int] = {}
+        self._journal: list[tuple[str, int]] = []
+        self.journal_path = journal_path
+        if journal_path and journal_path.exists():
+            self._replay_journal()
 
     def register(self, symbol: str) -> int:
         if symbol not in self._map:
-            self._map[symbol] = next(self._supply)
+            idx = len(self._map)
+            if idx >= len(_SMALL_PRIMES):
+                raise RuntimeError("Prime pool exhausted (>664 k symbols)")
+            self._map[symbol] = _SMALL_PRIMES[idx]
         return self._map[symbol]
 
     def write(self, symbol: str) -> None:
-        prime = self.register(symbol)
-        self._value *= prime
+        p = self.register(symbol)
+        self._value *= p
+        self._journal.append((symbol, +1))
+        self._flush()
 
     def check(self, symbol: str) -> bool:
-        prime = self._map.get(symbol)
-        if prime is None:
-            return False
-        return self._valuation(self._value, prime) > 0
+        p = self._map.get(symbol)
+        return p is not None and self._value % p == 0
 
     @property
     def size(self) -> int:
         return len(self._map)
 
+    def _flush(self) -> None:
+        if self.journal_path:
+            self.journal_path.write_text("\n".join(f"{s},{d}" for s, d in self._journal))
+
+    def _replay_journal(self) -> None:
+        for line in self.journal_path.read_text().splitlines():
+            symbol, delta = line.strip().split(",")
+            p = self.register(symbol)
+            if int(delta) == 1:
+                self._value *= p
+            else:
+                if self._value % p == 0:
+                    self._value //= p
+
 
 # ---------------------------------------------------------------------------
-# Continuous cache used by both memories
+# 2.  Energy constants (μJ scale, patent claim 7a)
 # ---------------------------------------------------------------------------
+FLOP_ENERGY_PJ = 0.4                       # 22-nm MAC
+DIM            = 128
+μJ_PER_FLOP    = FLOP_ENERGY_PJ * (DIM * DIM) / 1e6
+μJ_PRIME_BASE  = 0.05                      # sub-linear penalty
 
 
+# ---------------------------------------------------------------------------
+# 3.  Continuous cache (unchanged maths, only style)
+# ---------------------------------------------------------------------------
 class ContinuousCache:
     def __init__(self, dim: int = 128) -> None:
         self.dim = dim
         self.x: List[float] = [0.0] * dim
         self.projectors: List[List[List[float]]] = []
 
-    @staticmethod
-    def _random_unit_vector(dim: int) -> List[float]:
-        values = [random.gauss(0, 1) for _ in range(dim)]
-        norm = math.sqrt(sum(v * v for v in values)) or 1.0
-        return [v / norm for v in values]
-
     def add_projector(self) -> None:
         v = self._random_unit_vector(self.dim)
-        projector = [[v[i] * v[j] for j in range(self.dim)] for i in range(self.dim)]
-        self.projectors.append(projector)
+        self.projectors.append([[v[i] * v[j] for j in range(self.dim)] for i in range(self.dim)])
 
     def expect(self, idx: int) -> float:
-        projector = self.projectors[idx]
-        total = 0.0
-        x = self.x
-        for j in range(self.dim):
-            row = projector[j]
-            for k in range(self.dim):
-                total += x[j] * row[k] * x[k]
-        return total
+        proj, x = self.projectors[idx], self.x
+        return sum(x[j] * proj[j][k] * x[k] for j in range(self.dim) for k in range(self.dim))
 
     def gradient_step(self, idx: int, target: float, lr: float = 0.05) -> None:
-        projector = self.projectors[idx]
-        prediction = self.expect(idx)
-        error = target - prediction
-        grad: List[float] = [0.0] * self.dim
-        x = self.x
+        proj = self.projectors[idx]
+        pred = self.expect(idx)
+        err  = target - pred
+        grad = [2.0 * sum(proj[j][k] * self.x[k] for k in range(self.dim)) for j in range(self.dim)]
         for j in range(self.dim):
-            row = projector[j]
-            grad[j] = 2.0 * sum(row[k] * x[k] for k in range(self.dim))
-        for j in range(self.dim):
-            x[j] += lr * error * grad[j]
+            self.x[j] += lr * err * grad[j]
 
     def energy(self) -> float:
-        return sum(value * value for value in self.x)
+        return sum(v * v for v in self.x)
+
+    @staticmethod
+    def _random_unit_vector(dim: int) -> List[float]:
+        v = [random.gauss(0, 1) for _ in range(dim)]
+        norm = math.sqrt(sum(x * x for x in v)) or 1.0
+        return [x / norm for x in v]
 
 
 # ---------------------------------------------------------------------------
-# Memory substrates
+# 4.  Memory substrates (cycle length in minutes, honest drift, μJ energy)
 # ---------------------------------------------------------------------------
-
-
 class TransformerMemory:
     def __init__(self, dim: int = 128) -> None:
         self.cache = ContinuousCache(dim)
-        self.symbol_to_index: Dict[str, int] = {}
+        self.sym2idx: dict[str, int] = {}
 
     def observe(self, symbol: str, truth: float) -> None:
-        idx = self.symbol_to_index.get(symbol)
-        if idx is None:
-            idx = len(self.symbol_to_index)
-            self.symbol_to_index[symbol] = idx
+        idx = self.sym2idx.setdefault(symbol, len(self.sym2idx))
+        if idx == len(self.cache.projectors):
             self.cache.add_projector()
         self.cache.gradient_step(idx, truth)
 
     def query(self, symbol: str) -> float:
-        idx = self.symbol_to_index.get(symbol)
-        if idx is None:
-            return 0.0
-        return self.cache.expect(idx)
+        idx = self.sym2idx.get(symbol)
+        return self.cache.expect(idx) if idx is not None else 0.0
 
     def energy(self) -> float:
-        return self.cache.energy()
+        return μJ_PER_FLOP
 
 
 class DualSubstrateMemory:
     def __init__(self, dim: int = 128, cycle_minutes: float = 15.0) -> None:
         self.continuous = ContinuousCache(dim)
-        self.discrete = PrimeLedger()
-        self.symbol_to_index: Dict[str, int] = {}
+        self.discrete   = PrimeLedger()
+        self.sym2idx: dict[str, int] = {}
         self.cycle_minutes = cycle_minutes
-        self.cycle_steps = 0
-        self.step = 0
+        self.cycle_steps   = 0
+        self.step          = 0
 
     def observe(self, symbol: str, truth: float) -> None:
-        idx = self.symbol_to_index.get(symbol)
-        if idx is None:
-            idx = len(self.symbol_to_index)
-            self.symbol_to_index[symbol] = idx
+        idx = self.sym2idx.setdefault(symbol, len(self.sym2idx))
+        if idx == len(self.continuous.projectors):
             self.discrete.register(symbol)
             self.continuous.add_projector()
         self.continuous.gradient_step(idx, truth)
@@ -167,24 +160,19 @@ class DualSubstrateMemory:
             random.shuffle(perm)
             self.continuous.x = [self.continuous.x[perm[i]] for i in range(self.continuous.dim)]
 
-    def query(self, symbol: str) -> Tuple[float, bool]:
-        idx = self.symbol_to_index.get(symbol)
+    def query(self, symbol: str) -> tuple[float, bool]:
+        idx = self.sym2idx.get(symbol)
         if idx is None:
             return 0.0, False
         return self.continuous.expect(idx), self.discrete.check(symbol)
 
     def energy(self) -> float:
-        continuous_energy = self.continuous.energy()
-        size = self.discrete.size
-        discrete_penalty = math.log(size + 1) / 1000.0 if size else 0.0
-        return continuous_energy + discrete_penalty
+        return μJ_PER_FLOP + μJ_PRIME_BASE * math.log(self.discrete.size + 1)
 
 
 # ---------------------------------------------------------------------------
-# Simulation helpers
+# 5.  Simulation loop (generator for live Streamlit bar)
 # ---------------------------------------------------------------------------
-
-
 @dataclass
 class MetricSnapshot:
     minute: float
@@ -193,69 +181,37 @@ class MetricSnapshot:
     energy: float
 
 
-def _symbol_sequence(seed: int, population: Sequence[str], steps: int) -> Iterable[str]:
-    rng = random.Random(seed)
-    for _ in range(steps):
-        yield rng.choice(population)
-
-
 def simulate_memory(
     memory: TransformerMemory | DualSubstrateMemory,
     *,
     duration_minutes: int = 25,
     tokens_per_minute: int = 60,
     recall_threshold: float = 0.5,
-) -> List[MetricSnapshot]:
+) -> Iterator[tuple[float, list[MetricSnapshot]]]:
     steps = duration_minutes * tokens_per_minute
-    names = ["Alice", "Bob", "Charlie", "Delta", "Echo"] * 17
-    seen: Dict[str, int] = {}
-    snapshots: List[MetricSnapshot] = []
+    names = ["Alice", "Bob", "Charlie", "Delta", "Echo"] * 20
+    rng   = random.Random(42)
+    seen: dict[str, int] = {}
 
     if isinstance(memory, DualSubstrateMemory):
-        memory.cycle_steps = int(memory.cycle_minutes * tokens_per_minute) if memory.cycle_minutes else 0
+        memory.cycle_steps = int(memory.cycle_minutes * tokens_per_minute)
 
-    for t, symbol in enumerate(_symbol_sequence(42, names, steps), start=1):
-        count = seen.get(symbol, 0)
-        truth = 1.0 if count == 0 else 0.7
+    snapshots: list[MetricSnapshot] = []
+
+    for t in range(1, steps + 1):
+        symbol = rng.choice(names)
+        count  = seen.get(symbol, 0)
+        truth  = 1.0 if count == 0 else 0.7
         seen[symbol] = count + 1
 
         memory.observe(symbol, truth)
 
-        if isinstance(memory, DualSubstrateMemory):
-            expected, _ = memory.query(symbol)
-        else:
-            expected = memory.query(symbol)
+        expected = memory.query(symbol)[0] if isinstance(memory, DualSubstrateMemory) else memory.query(symbol)
+        recall   = 1.0 if expected >= recall_threshold else 0.0
+        drift    = abs(expected - 1.0)          # hard truth
+        energy   = memory.energy()
+        minute   = t / tokens_per_minute
+        snapshots.append(MetricSnapshot(minute, recall, drift, energy))
 
-        recall_flag = 1.0 if expected >= recall_threshold else 0.0
-
-        drift = abs(expected - truth)
-        energy = memory.energy()
-        minute = t / tokens_per_minute
-        snapshots.append(MetricSnapshot(minute=minute, recall=recall_flag, drift=drift, energy=energy))
-
-    return snapshots
-
-
-def compare_models(
-    *,
-    duration_minutes: int = 25,
-    tokens_per_minute: int = 60,
-    dim: int = 128,
-    cycle_minutes: float = 15.0,
-) -> Dict[str, List[MetricSnapshot]]:
-    random.seed(1234)
-    transformer = TransformerMemory(dim=dim)
-    dual = DualSubstrateMemory(dim=dim, cycle_minutes=cycle_minutes)
-
-    return {
-        "Grok + transformers": simulate_memory(
-            transformer,
-            duration_minutes=duration_minutes,
-            tokens_per_minute=tokens_per_minute,
-        ),
-        "Grok + dual substrate": simulate_memory(
-            dual,
-            duration_minutes=duration_minutes,
-            tokens_per_minute=tokens_per_minute,
-        ),
-    }
+        if t % tokens_per_minute == 0:
+            yield minute, snapshots[-tokens_per_minute:]
