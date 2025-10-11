@@ -17,4 +17,4 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourhandle/p-adic-memory"
+Homepage = "https://github.com/Berigny/p-adic-memory"
