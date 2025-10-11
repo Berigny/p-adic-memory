@@ -1,3 +1,5 @@
-# src/p_adic_memory/__init__.py
-from .substrate import DualSubstrate
-__all__ = ["DualSubstrate"]
+"""Public API for the anonymised dual-substrate benchmark harness."""
+
+from .dual_substrate import DualSubstrate, available_models, build_model
+
+__all__ = ["DualSubstrate", "available_models", "build_model"]
