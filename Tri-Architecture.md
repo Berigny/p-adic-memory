@@ -1,4 +1,4 @@
-# SECURING THE FUTURE OF INTELLIGENCE: THE COHERENCE ERA
+# Securing the Future of Intelligience: THE COHERENCE ERA
 
 ## 1. Strategic Imperative – End of the Binary Era
 Modern AI is energy-bound, drift-prone and silicon-saturated.  
@@ -31,3 +31,5 @@ Three interoperable layers:
 ## 5. Collaboration Invitation
 We seek partners in **photonic fabrication**, **quaternary logic**, **cognitive architecture**, **ethics frameworks**, **policy**.  
 Contact: [david@berigny.org] – let’s build the substrate of tomorrow’s civilisation.
+
+Tri-Architecture derived from a T0 Reality Theory: [https://www.linkedin.com/pulse/universe-operating-system-os-david-berigny-cuewc]
