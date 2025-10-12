@@ -53,3 +53,5 @@ for token, label in my_stream:
 ```
 
 **Stop reading — run it.**
+
+[Tri-Architecture white-paper](Tri-Architecture.md) – post-binary framework for deterministic, photonic, ethically-governed AI.
