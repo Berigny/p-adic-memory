@@ -11,7 +11,7 @@ PRIME_CACHE = pathlib.Path(__file__).with_suffix(".primes")
 def _load_primes() -> List[int]:
     if PRIME_CACHE.exists():
         return pickle.loads(PRIME_CACHE.read_bytes())
-    limit = 10_000_000                                   # 664 579 primes
+    limit = 20_000                                       # 2 262 primes
     sieve = bytearray(b"\x01") * (limit + 1)
     sieve[0:2] = b"\x00\x00"
     for p in range(2, int(limit ** 0.5) + 1):
