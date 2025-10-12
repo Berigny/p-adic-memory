@@ -1,4 +1,4 @@
-# p-adic-memory - Grok-transformer Versus Grok + dual 
+# Grok-transformer | VS | Grok + dual 
 > Same FLOPs, 38 % less juice, 77 % less RAM, +13.8 pp exact recall — no context window, no drift.
 
 ```bash
