@@ -16,17 +16,8 @@ python -m p_adic_memory     # JSON report in 2 min
 | **FLOP/token** | 16 384 | 16 384 | **0 %** |
 | **Wall time** i7-1260P | 5.07 s | 5.07 s | **+0 %** |
 
-Here's our logo (hover to see the title text):
+![alt text](https://raw.githubusercontent.com/Berigny/p-adic-memory/refs/heads/main/archive/screencapture-grok-dual-substrate-sim-streamlit-app-2025-10-12-14_52_52.png "Screen-shot")
 
-Inline-style: 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
-
-Reference-style: 
-![alt text][logo]
-
-[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
-
-![Screenshot of a recent test - via Streamlit.]([[https://myoctocat.com/assets/images/base-octocat.svg](https://github.com/Berigny/p-adic-memory/blob/main/archive/screencapture-grok-dual-substrate-sim-streamlit-app-2025-10-12-14_52_52.png?raw=true)](https://github.com/Berigny/p-adic-memory/blob/main/archive/screencapture-grok-dual-substrate-sim-streamlit-app-2025-10-12-14_52_52.png?raw=true))
 
 ## How it works
 1. **ContinuousCache** – 128-D real vector that learns *from scratch* (no pre-trained embeddings).  
