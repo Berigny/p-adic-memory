@@ -141,6 +141,7 @@ def parse_args() -> argparse.Namespace:
         "dual_substrate",
         "baseline_transformer",
         "nolima_baseline",
+        "lstm_baseline",
     ], required=True)
     parser.add_argument("--cycle", type=int, default=900, help="Cycle length for the dual substrate")
     parser.add_argument("--no-shuffle", action="store_true", help="Disable Möbius-style shuffle")
