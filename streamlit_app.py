@@ -2,8 +2,16 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 from dataclasses import asdict
 from typing import Dict, Iterable, Tuple
+
+ROOT = Path(__file__).resolve().parent
+SRC_DIR = ROOT / "src"
+if SRC_DIR.exists():
+    sys.path.insert(0, str(SRC_DIR))
 
 import altair as alt
 import pandas as pd
