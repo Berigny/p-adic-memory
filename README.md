@@ -16,6 +16,8 @@ python -m p_adic_memory     # JSON report in 2 min
 | **FLOP/token** | 16 384 | 16 384 | **0 %** |
 | **Wall time** i7-1260P | 5.07 s | 5.07 s | **+0 %** |
 
+![Screenshot of a recent test - via Streamlit.]([https://myoctocat.com/assets/images/base-octocat.svg](https://github.com/Berigny/p-adic-memory/blob/main/archive/screencapture-grok-dual-substrate-sim-streamlit-app-2025-10-12-14_52_52.png?raw=true))
+
 ## How it works
 1. **ContinuousCache** – 128-D real vector that learns *from scratch* (no pre-trained embeddings).  
 2. **PrimeLedger** – each symbol gets a unique prime; memory = product of primes.  
