@@ -1,6 +1,6 @@
 # Theoretical Basis of p-adic-memory
 
-This document outlines the theoretical concepts that inspired the `p-adic-memory` model, specifically addressing the connection to ultrametricity and clarifying the "no vectors" claim.
+This outlines the theoretical concepts that inspired the `p-adic-memory` model, specifically addressing the connection to ultrametricity and clarifying the "no vectors" claim.
 
 ## The Dual-Substrate Model
 
