@@ -23,12 +23,3 @@ The `PrimeLedger` can be viewed as a simplified, practical application of this c
 -   **Ultrametric Proxy**: While this implementation does not compute a formal p-adic norm, the check for set membership (`product % prime == 0`) acts as a proxy for an ultrametric distance. It partitions the memory space in a way that is analogous to how p-adic valuations partition the integers. The "distance" between a memory state and a symbol is effectively zero if the symbol's prime divides the state, and one otherwise.
 
 This number-theoretic approach allows for a memory system that is computationally efficient and avoids the "semantic drift" often found in purely vector-based models.
-
-## Clarification on the "No Vectors" Claim
-
-The `README.md` states that the model uses "no vectors." This statement requires clarification.
-
--   The `ContinuousCache` component **does use a vector**—a 128-dimensional state vector. It operates in a continuous vector space to learn its predictions.
--   The "no vectors" claim specifically refers to the **absence of pre-trained, dense vector embeddings** (like Word2Vec, GloVe, or BERT embeddings) that are common in modern NLP. The model does not rely on external, pre-computed semantic representations.
-
-Instead, the `p-adic-memory` model learns all of its representations from scratch. The `PrimeLedger`, which is the core of the long-term memory system, is a purely symbolic, non-vectorial mechanism. The claim is intended to highlight this distinction from mainstream, embedding-reliant architectures.
