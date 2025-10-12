@@ -27,12 +27,12 @@ COLOR_SCALE = alt.Scale(
 
 
 st.set_page_config(
-    page_title="Grok Memory Substrate Test",
+    page_title="Grok + transformers VS Grok + dual substrate",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-st.title("Grok Memory Substrate Test")
+st.title("Grok + transformers VS Grok + dual substrate")
 st.caption(
     "Run a 25-minute synthetic dialogue to compare Grok's transformer baseline "
     "with a dual-substrate hybrid."
