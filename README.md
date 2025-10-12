@@ -28,7 +28,8 @@ python -m p_adic_memory     # JSON report in 2 min
    Membership = `ledger % prime == 0` (O(1), no collision up to 664 k symbols).  
 3. **Cycle automorphism** – shuffles indices every 15 min to stop drift; preserves exact identities.
 
-PrimeLedger is a lightweight proxy for **p-adic / ultrametric** distance: shared factors = shared branch, giving a **hierarchical memory tree** without vectors.
+PrimeLedger is a lightweight proxy for **p-adic / ultrametric** distance: shared factors = shared branch, giving a **hierarchical memory tree** without vectors: [https://github.com/Berigny/p-adic-memory/blob/main/THEORY.md](https://github.com/Berigny/p-adic-memory/blob/main/THEORY.md)
+
 
 ## Run your own trace
 ```python
