@@ -30,4 +30,4 @@ Three interoperable layers:
 
 ## 5. Collaboration Invitation
 We seek partners in **photonic fabrication**, **quaternary logic**, **cognitive architecture**, **ethics frameworks**, **policy**.  
-Contact: [your-email] – let’s build the substrate of tomorrow’s civilisation.
+Contact: [david@berigny.org] – let’s build the substrate of tomorrow’s civilisation.
