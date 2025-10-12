@@ -1,4 +1,4 @@
-# Grok-transformers | VS | Grok + dual 
+# Grok-transformer | VS | Grok + dual 
 > Same FLOPs, 38 % less juice, 77 % less RAM, +13.8 pp exact recall — no context window, no drift.
 
 ```bash
@@ -7,14 +7,14 @@ streamlit run app.py        # interactive A/B demo
 python -m p_adic_memory     # JSON report in 2 min
 ```
 
-| 25-min, 4 000 tokens, 87 entities | Grok-transformer | Grok + dual | Δ |
+| 25-min, 4 000 tokens, 87 entities | Grok-transformer | Grok + dual | Δ vs baseline |
 | --- | --- | --- | --- |
 | **Exact string recall** | 73.6 % | 87.4 % | **+13.8 pp** |
-| **Mean prob drift** `|p − 1|` | 0.36 | 0.30 | **−17 %** |
-| **Peak RAM** | 1.22 MB | 0.28 MB | **−77 %** |
+| **Mean prob drift** | 0.36 | 0.30 | **−17 %** |
+| **Peak RAM** | 1.22 MB | 0.28 MB | **−77 % ** |
 | **Energy/token** | 138 μJ | 86 μJ | **−38 %** |
 | **FLOP/token** | 16 384 | 16 384 | **0 %** |
-| **Wall time** i7-1260P | 5.07 s | 5.07 s | **+0 %** |
+| **Wall time** i7-1260P | 5.03 s | 5.06 s | **+0.6 % ** |
 
 
 #### Transformer VS dual interactive 👉 [https://grok-dual-substrate-sim.streamlit.app](https://grok-dual-substrate-sim.streamlit.app).
