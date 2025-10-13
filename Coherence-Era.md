@@ -51,13 +51,12 @@ Fractal teams of 10→100→1000→[scale by power of 10s]  agents that vote, de
 ## Why This Matters Beyond AI
 ## Quantum computers get a stable memory anchor—decoherence insurance. Data centers stop being power-hungry amnesiacs. Regulators gain auditability by design, not afterthought.
 
-----
 
-## Call for Co-Conspirators
+# Call for Co-Conspirators
 
 ### We’re open-sourcing specs & simulators for: Photonic quaternary gates p-adic memory compilers Fractal governance SDKs If you build hardware, craft policy, or chase math for fun—let’s talk.
 
-----
+
 
 ## Bottom line:
 Stop polishing the binary penny.
