@@ -21,7 +21,7 @@ Reality = **Continuous River** ⊕ **Discrete Library**
 **Goal:** Let the system **swim** *and* **remember**.
 
 
-Instead of eddies that dissipate, we build a permanent library on the riverbank—so the system can swim and remember.----
+Instead of eddies that dissipate, we build a permanent library on the riverbank—so the system can swim and remember.
 
 ## The Tri-Architecture That Makes It Real
 
