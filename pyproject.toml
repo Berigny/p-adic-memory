@@ -17,7 +17,8 @@ classifiers = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/p_adic_memory"]   # or ["p_adic_memory"] if at root
+packages = ["p_adic_memory"]
+
 
 [project.urls]
 Homepage = "https://github.com/Berigny/p-adic-memory"
