@@ -62,6 +62,7 @@ Fractal teams of 10→100→1000→[scale by power of 10s]  agents that vote, de
 Stop polishing the binary penny.
 Start architecting the Coherence dollar.
 
-#Spread Future hashtag:
+### Era spreads
+
 #PostBinary #CoherenceEra #PhotonicComputing #AIDrift #PrimeLedger #FutureOfMemory #QuantumReady
 
