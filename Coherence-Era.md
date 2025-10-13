@@ -7,9 +7,8 @@ AI is forgetting, overheating, and stalling out just as we need it most.
 
 ## Why? Because we’re still trying to run 21st-century intelligence on a 20th-century substrate: Binary logic + floating-point memory = semantic drift, energy explosion, and brittle recall.
 
-----
 
-## Enter: The Coherence Era
+# Enter: The Coherence Era
 A post-binary architecture that treats reality as two co-equal layers:
 Layer	Nickname	Job Description
 Continuous	The River	Adaptive, probabilistic, real-time learning
