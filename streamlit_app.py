@@ -17,7 +17,9 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from p_adic_memory.simulation import MetricSnapshot, HardwareSample, compare_models, DIM
+from p_adic_memory import DualSubstrate, available_models, build_model
+import p_adic_memory as pam
+from p_adic_memory.simulation import HardwareSample, MetricSnapshot, DIM, compare_models
 
 
 COLOR_SCALE = alt.Scale(
@@ -31,6 +33,16 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+st.sidebar.caption(f"p-adic-memory {pam.__version__}")
+
+# Keep the public API surfaced for interactive users.
+_ = (DualSubstrate, build_model)
+
+_available = available_models()
+if _available:
+    st.sidebar.write("Available models:")
+    st.sidebar.write(", ".join(_available))
 
 st.title("Grok + transformers VS Grok + dual substrate")
 st.caption(
