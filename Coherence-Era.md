@@ -10,9 +10,17 @@ AI is forgetting, overheating, and stalling out just as we need it most.
 
 # Enter: The Coherence Era
 A post-binary architecture that treats reality as two co-equal layers:
-Layer	Nickname	Job Description
-Continuous	The River	Adaptive, probabilistic, real-time learning
-Discrete	The Library	Immutable, symbolic, long-term memory
+
+Reality = **Continuous River** ⊕ **Discrete Library**
+
+| Substrate | Nickname | Super-power | Limitation |
+|-----------|----------|-------------|------------|
+| **Continuous** | The River | Adaptive, probabilistic learning | Drift + forgetting |
+| **Discrete** | The Library | Exact, incorruptible memory | Static, no inference |
+
+**Goal:** Let the system **swim** *and* **remember**.
+
+
 Instead of eddies that dissipate, we build a permanent library on the riverbank—so the system can swim and remember.----
 
 ## The Tri-Architecture That Makes It Real
