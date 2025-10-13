@@ -1,11 +1,11 @@
-# What the hell is the Coherence Eta?
+# What the hell is the Coherence Era?
 
 We’re hitting the wall of the Binary Era.
 Not metaphorically—literally.
 
 AI is forgetting, overheating, and stalling out just as we need it most.
 
-# Why? Because we’re still trying to run 21st-century intelligence on a 20th-century substrate: Binary logic + floating-point memory = semantic drift, energy explosion, and brittle recall.
+## Why? Because we’re still trying to run 21st-century intelligence on a 20th-century substrate: Binary logic + floating-point memory = semantic drift, energy explosion, and brittle recall.
 
 ----
 
