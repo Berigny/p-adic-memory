@@ -7,17 +7,33 @@ name            = "p-adic-memory"
 version         = "0.1.0"
 description     = "25-min lossless conversational memory via ℝ×ℚₚ dual substrate"
 readme          = "README.md"
-authors         = [{name = "Your Name", email = "you@example.com"}]
-license         = {text = "Apache-2.0"}
+authors         = [{name = "Berigny"}]
+license         = {file = "LICENSE"}
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: OS Independent",
 ]
 
+[project.optional-dependencies]
+app = [
+    "streamlit>=1.31",
+    "altair>=5.0",
+    "pandas>=1.5",
+]
+bench = [
+    "numpy>=1.23",
+]
+llm = [
+    "torch",
+    "transformers>=4.40",
+    "accelerate>=0.30",
+    "bitsandbytes>=0.43",
+]
+
 [tool.hatch.build.targets.wheel]
-packages = ["p_adic_memory"]
+packages = ["src/p_adic_memory"]
 
 
 [project.urls]
