@@ -267,6 +267,10 @@ class DualSubstrate:
                 fh.write(json.dumps(record) + "\n")
 
 
+class DualSubstrateMemory(DualSubstrate):
+    """Backward-compatibility shim; prefer :class:`DualSubstrate`."""
+
+
 # Convenience factory for CLI usage ------------------------------------------------
 MODEL_REGISTRY = {
     "dual_substrate": DualSubstrate,
