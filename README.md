@@ -35,9 +35,9 @@ PrimeLedger is a lightweight proxy for **p-adic / ultrametric** distance: shared
 ```python
 from p_adic_memory import DualSubstrateMemory
 
-mem = DualSubstrateMemory(dim=128, cycle_minutes=15)
-for token, label in my_stream:
-    mem.observe(token, label)
+mem = DualSubstrateMemory(dim=128)
+for token in my_stream:
+    mem.observe(token, 1.0)  # truth score in [0, 1]
     prob, exact = mem.query(token)   # prob in [0,1], exact ∈ {True,False}
 ```
 
