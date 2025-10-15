@@ -1,0 +1,10 @@
+[
+    {
+        "id": "summary_1",
+        "prompt": "In one sentence, summarise the following log:\nAlice met Bob at 9:00. They discussed primes 2, 3, 5, 7 and Möbius transforms."
+    },
+    {
+        "id": "recall_1",
+        "prompt": "Recall the meeting time and the smallest prime they discussed. Only output in this exact format: TIME=<time>; PRIME=<n>."
+    }
+]
