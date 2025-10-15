@@ -14,6 +14,10 @@ GEN_KW = dict(
 
 BAD_ANGLE = re.compile(r"<[^>]{0,200}>")
 
+
+def clean_output(s: str) -> str:
+    return BAD_ANGLE.sub("", s).strip()
+
 def load_model(model_name: str = DEFAULT_MODEL, revision: str | None = DEFAULT_REV):
     qconf = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16,
                                bnb_4bit_use_double_quant=True, bnb_4bit_quant_type="nf4")
@@ -42,5 +46,6 @@ def generate(tok, mdl, user_text: str, **overrides):
     kw = {**GEN_KW, **overrides}
     with torch.inference_mode():
         out = mdl.generate(**ids, **kw)
-    s = tok.decode(out[0], skip_special_tokens=True).strip()
-    return BAD_ANGLE.sub("", s).strip()
+    gen_ids = out[0][ids["input_ids"].shape[1]:]
+    s = tok.decode(gen_ids, skip_special_tokens=True).strip()
+    return clean_output(s)
