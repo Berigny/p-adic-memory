@@ -1,3 +1,4 @@
+import re
 import warnings
 from importlib.metadata import PackageNotFoundError
 
@@ -96,4 +97,12 @@ class DualSubstrateGenerator:
         gkw = _filter_gen_kwargs(gen_kwargs, self.tok.eos_token_id, self.tok.eos_token_id)
         with torch.inference_mode():
             out = self.model.generate(**inputs, **gkw)
-        return self.tok.decode(out[0], skip_special_tokens=True).strip()
+        gen_ids = out[0][inputs["input_ids"].shape[1]:]
+        return clean_output(self.tok.decode(gen_ids, skip_special_tokens=True)).strip()
+
+
+BAD_ANGLE = re.compile(r"<[^>]{0,200}>")
+
+
+def clean_output(s: str) -> str:
+    return BAD_ANGLE.sub("", s).strip()
