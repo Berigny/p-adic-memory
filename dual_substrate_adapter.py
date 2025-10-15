@@ -1,5 +1,13 @@
+import warnings
+from importlib.metadata import PackageNotFoundError
+
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+try:
+    from transformers import BitsAndBytesConfig
+except ImportError:  # pragma: no cover - optional dependency
+    BitsAndBytesConfig = None
 
 from p_adic_memory import DualSubstrate
 
@@ -34,19 +42,33 @@ def _filter_gen_kwargs(kwargs, pad_id, eos_id):
 
 class DualSubstrateGenerator:
     def __init__(self, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0", mem_dim=128, cycle_minutes=15):
-        qconf = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.float16,
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_quant_type="nf4",
-        )
+        qconf = None
+        if BitsAndBytesConfig is not None:
+            qconf = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4",
+            )
         self.tok = AutoTokenizer.from_pretrained(model_name, use_fast=True)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            device_map="auto",
-            trust_remote_code=True,
-            quantization_config=qconf,
-        )
+        load_kwargs = {
+            "device_map": "auto",
+            "trust_remote_code": True,
+        }
+        if qconf is not None:
+            load_kwargs["quantization_config"] = qconf
+        try:
+            self.model = AutoModelForCausalLM.from_pretrained(model_name, **load_kwargs)
+        except (PackageNotFoundError, ModuleNotFoundError) as exc:
+            if "bitsandbytes" not in str(exc).lower():
+                raise
+            warnings.warn(
+                "bitsandbytes is unavailable; loading the model without 4-bit quantization.",
+                RuntimeWarning,
+            )
+            load_kwargs.pop("quantization_config", None)
+            load_kwargs["device_map"] = "cpu"
+            self.model = AutoModelForCausalLM.from_pretrained(model_name, **load_kwargs)
         self.mem = DualSubstrate(dim=mem_dim, cycle_minutes=cycle_minutes)
 
     def _augment_with_memory(self, user_text: str) -> str:
