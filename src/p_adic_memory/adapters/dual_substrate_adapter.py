@@ -1,16 +1,24 @@
-import re
+"""Optional local transformers adapter with dual-substrate augmentation."""
+
+from __future__ import annotations
+
 import warnings
 from importlib.metadata import PackageNotFoundError
+from typing import Callable, Dict
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-try:
+try:  # pragma: no cover - optional dependency
     from transformers import BitsAndBytesConfig
 except ImportError:  # pragma: no cover - optional dependency
     BitsAndBytesConfig = None
 
 from p_adic_memory import DualSubstrate
+from ..memory import POLICY
+from ..prompt_frame import chatify, clean_out
+
+__all__ = ["DualSubstrateGenerator"]
 
 _ALLOWED_GEN_KW = {
     "do_sample",
@@ -33,16 +41,24 @@ _ALLOWED_GEN_KW = {
 }
 
 
-def _filter_gen_kwargs(kwargs, pad_id, eos_id):
-    out = {k: v for k, v in kwargs.items() if k in _ALLOWED_GEN_KW}
-    out.setdefault("pad_token_id", pad_id)
-    out.setdefault("eos_token_id", eos_id)
-    out.setdefault("max_new_tokens", 128)
-    return out
+def _filter_gen_kwargs(kwargs: Dict[str, object], pad_id: int, eos_id: int) -> Dict[str, object]:
+    allowed = {key: kwargs[key] for key in kwargs if key in _ALLOWED_GEN_KW}
+    allowed.setdefault("pad_token_id", pad_id)
+    allowed.setdefault("eos_token_id", eos_id)
+    allowed.setdefault("max_new_tokens", 128)
+    return allowed
 
 
 class DualSubstrateGenerator:
-    def __init__(self, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0", mem_dim=128, cycle_minutes=15):
+    """Local HF-compatible generator that mirrors the notebook harness."""
+
+    def __init__(
+        self,
+        model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        *,
+        mem_dim: int = 128,
+        cycle_minutes: int = 15,
+    ) -> None:
         qconf = None
         if BitsAndBytesConfig is not None:
             qconf = BitsAndBytesConfig(
@@ -70,39 +86,30 @@ class DualSubstrateGenerator:
             load_kwargs.pop("quantization_config", None)
             load_kwargs["device_map"] = "cpu"
             self.model = AutoModelForCausalLM.from_pretrained(model_name, **load_kwargs)
-        self.mem = DualSubstrate(dim=mem_dim, cycle_minutes=cycle_minutes)
+        self.mem = DualSubstrate(dim=mem_dim, cycle=cycle_minutes * 60)
 
     def _augment_with_memory(self, user_text: str) -> str:
-        for i, tok_txt in enumerate(user_text.split()):
-            self.mem.observe(tok_txt, {"pos": i % 11, "role": "ctx"})
+        for idx, token in enumerate(user_text.split()):
+            self.mem.observe(token, {"pos": idx % 11, "role": "ctx"})
         recent = user_text.split()[-64:]
         recalls = []
-        for t in recent:
-            q = self.mem.query(t)
-            recalls.append(f"<mem exact={int(q.get('exact', False))} p={q.get('p', 0.0):.3f}>")
-        policy = (
-            "<memory-policy>"
-            "Use memory facts if present. If memory and the prompt disagree, prefer memory. "
-            "Output only what is requested; never repeat the question."
-            "</memory-policy>"
-        )
-        return f"{policy}\n<memory>{' '.join(recalls[:64])}</memory>\n\n{user_text}"
+        for token in recent:
+            query = self.mem.query(token)
+            recalls.append(
+                f"<mem exact={int(query.get('exact', False))} p={query.get('p', 0.0):.3f}>"
+            )
+        return f"{POLICY}\n<memory hidden='true'>{' '.join(recalls[:64])}</memory>\n\n{user_text}"
 
-    def generate(self, prompt: str, *, chat_wrapper=None, **gen_kwargs) -> str:
-        text = self._augment_with_memory(prompt)
-        if callable(chat_wrapper):
-            text = chat_wrapper(text)
+    def generate(self, prompt: str, *, backend: Callable[[str], str] | None = None, **gen_kwargs) -> str:
+        """Generate text optionally delegating to a backend for final decoding."""
 
-        inputs = self.tok(text, return_tensors="pt").to(self.model.device)
+        augmented = self._augment_with_memory(prompt)
+        chat_prompt = chatify(augmented) if backend is None else augmented
+
+        inputs = self.tok(chat_prompt, return_tensors="pt").to(self.model.device)
         gkw = _filter_gen_kwargs(gen_kwargs, self.tok.eos_token_id, self.tok.eos_token_id)
         with torch.inference_mode():
             out = self.model.generate(**inputs, **gkw)
         gen_ids = out[0][inputs["input_ids"].shape[1]:]
-        return clean_output(self.tok.decode(gen_ids, skip_special_tokens=True)).strip()
-
-
-BAD_ANGLE = re.compile(r"<[^>]{0,200}>")
-
-
-def clean_output(s: str) -> str:
-    return BAD_ANGLE.sub("", s).strip()
+        text = self.tok.decode(gen_ids, skip_special_tokens=True)
+        return clean_out(text)
