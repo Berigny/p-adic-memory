@@ -8,11 +8,20 @@ except PackageNotFoundError:  # editable installs during dev
 
 # Re-export the stable API surface
 from .dual_substrate import DualSubstrate, DualSubstrateMemory, available_models, build_model
+from .harness import baseline_generate, dual_generate
+from .prompt_frame import chatify, clean_out
+from .memory import POLICY, build_mem_blob
 
 __all__ = [
     "DualSubstrate",
     "DualSubstrateMemory",
     "available_models",
     "build_model",
+    "baseline_generate",
+    "dual_generate",
+    "chatify",
+    "clean_out",
+    "POLICY",
+    "build_mem_blob",
     "__version__",
 ]

@@ -2,64 +2,41 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-import json
-
-ROOT = Path(__file__).resolve().parent
-SRC_DIR = ROOT / "src"
-if SRC_DIR.exists():
-    sys.path.insert(0, str(SRC_DIR))
-
 import streamlit as st
-from p_adic_memory.harness import load_model, generate
 
-# --- Page Config ---
+from p_adic_memory.backends import GEMINI_MODEL, gemini_generate_text
+from p_adic_memory.harness import baseline_generate, dual_generate
+
 st.set_page_config(
     page_title="p-adic Memory Test Harness",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# --- Model Loading ---
-@st.cache_resource
-def get_model():
-    """Load and cache the model."""
-    return load_model()
+st.title("Dual-Substrate A/B Harness")
+st.caption("Run the same prompt against the baseline and memory-augmented paths.")
 
-tok, mdl = get_model()
+prompt = st.text_area("Prompt", height=150)
+mode = st.radio("Mode", ("Baseline", "Dual"))
 
-# --- UI Components ---
-st.title("p-adic Memory Test Harness")
-st.caption("A simple interface to test the dual-substrate memory model.")
-
-# --- Test Case Loading ---
-try:
-    with open("tests/test_cases.json") as f:
-        test_cases = json.load(f)
-
-    test_case_prompts = {case["id"]: case["prompt"] for case in test_cases}
-    selected_test_case = st.selectbox("Choose a test case", options=list(test_case_prompts.keys()))
-    user_text = st.text_area("Or enter your own prompt here:", value=test_case_prompts[selected_test_case], height=150)
-except FileNotFoundError:
-    st.error("`tests/test_cases.json` not found. Please create it to load test cases.")
-    user_text = st.text_area("Enter your prompt here:", height=150)
-
-if st.button("Generate Response", type="primary"):
-    if user_text:
+if st.button("Run", type="primary"):
+    if prompt.strip():
         with st.spinner("Generating response..."):
-            response = generate(tok, mdl, user_text)
-            st.subheader("Generated Response")
-            st.markdown(response)
+            try:
+                if mode == "Baseline":
+                    output = baseline_generate(prompt, backend=gemini_generate_text)
+                else:
+                    output = dual_generate(prompt, backend=gemini_generate_text)
+            except RuntimeError as exc:
+                st.error(str(exc))
+            else:
+                st.subheader("Response")
+                st.code(output or "<empty>")
     else:
-        st.warning("Please enter a prompt.")
+        st.warning("Please enter a prompt before running the harness.")
 
-# --- Sidebar ---
-st.sidebar.title("About")
-st.sidebar.info(
-    "This application uses a shared harness to ensure consistent model outputs "
-    "between the Streamlit app and the Colab notebook."
+st.sidebar.title("Backend")
+st.sidebar.info(f"Gemini model: `{GEMINI_MODEL}` (via google.colab.ai)")
+st.sidebar.caption(
+    "To run locally without Colab, supply a custom backend callable to ``baseline_generate``/``dual_generate``."
 )
-st.sidebar.title("Model Information")
-st.sidebar.info(f"**Model:** `{mdl.config.name_or_path}`")
-st.sidebar.info(f"**Tokenizer:** `{tok.name_or_path}`")
