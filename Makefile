@@ -1,7 +1,7 @@
 PYTHON ?= python
 PYTEST ?= pytest
 
-.PHONY: help install test demo bench-dual bench-transformer bench-nolima bench-all score streamlit-spec streamlit-app
+.PHONY: help install test demo bench-dual bench-transformer bench-nolima bench-all score streamlit-spec streamlit-app streamlit-versus
 
 help:
 	@echo "Targets:"
@@ -15,6 +15,7 @@ help:
 	@echo "  score              Aggregate logs into results.csv"
 	@echo "  streamlit-spec     Print the Streamlit spec structure"
 	@echo "  streamlit-app      Install extras and launch the Streamlit UI"
+	@echo "  streamlit-versus   Install extras and launch the versus Streamlit UI"
 
 install:
 	$(PYTHON) -m pip install -r requirements.txt
@@ -45,3 +46,7 @@ streamlit-spec:
 streamlit-app:
 	$(PYTHON) -m pip install -r requirements.txt streamlit
 	PYTHONPATH=src streamlit run streamlit_app.py
+
+streamlit-versus:
+	$(PYTHON) -m pip install -r requirements.txt streamlit
+	PYTHONPATH=src streamlit run versus.py
