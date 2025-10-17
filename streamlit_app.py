@@ -4,6 +4,16 @@ from __future__ import annotations
 
 import streamlit as st
 
+import importlib.util
+import sys
+from pathlib import Path
+
+if importlib.util.find_spec("p_adic_memory") is None:  # pragma: no cover - runtime import shim
+    project_root = Path(__file__).resolve().parent
+    src_dir = project_root / "src"
+    if src_dir.exists():
+        sys.path.insert(0, str(src_dir))
+
 from p_adic_memory.backends import GEMINI_MODEL, gemini_generate_text
 from p_adic_memory.harness import baseline_generate, dual_generate
 
