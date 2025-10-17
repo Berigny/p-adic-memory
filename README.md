@@ -17,9 +17,7 @@ python -m p_adic_memory     # JSON report in 2 min
 | **Wall time** i7-1260P | 5.03 s | 5.06 s | **+0.6 % ** |
 
 
-#### Transformer VS dual interactive 👉 [https://grok-dual-substrate-sim.streamlit.app](https://grok-dual-substrate-sim.streamlit.app).
-
-
+#### Transformer VS dual interactive 👉 [https://berigny-p-adic-memory-versus-4cqpap.streamlit.app](https://berigny-p-adic-memory-versus-4cqpap.streamlit.app)
 
 
 ## How it works
