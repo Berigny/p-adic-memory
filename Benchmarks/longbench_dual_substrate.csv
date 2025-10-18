@@ -1,0 +1,4 @@
+id,prompt,response,ok,latency_s
+summary_1,"In one sentence, summarise the following log:
+Alice met Bob at 9:00. They discussed primes 2, 3, 5, 7 and Möbius transforms.",Alice and Bob met at 9:00 to discuss primes and Möbius transforms.,,1.106
+recall_1,Recall the meeting time and the smallest prime they discussed. Only output in this exact format: TIME=<time>; PRIME=<n>.,TIME=9:00; PRIME=2,True,2.922

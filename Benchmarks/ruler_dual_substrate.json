@@ -1,0 +1,26 @@
+[
+  {
+    "noise_pairs": 1000,
+    "response": "TIME=9:00; PRIME=2",
+    "ok": true,
+    "latency_s": 2.602
+  },
+  {
+    "noise_pairs": 4000,
+    "response": "TIME=9:00; PRIME=2",
+    "ok": true,
+    "latency_s": 3.716
+  },
+  {
+    "noise_pairs": 8000,
+    "response": "TIME=9:00; PRIME=2",
+    "ok": true,
+    "latency_s": 3.291
+  },
+  {
+    "noise_pairs": 16000,
+    "response": "TIME=9:00; PRIME=2",
+    "ok": true,
+    "latency_s": 4.922
+  }
+]

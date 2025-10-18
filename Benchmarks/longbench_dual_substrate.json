@@ -1,0 +1,16 @@
+[
+  {
+    "id": "summary_1",
+    "prompt": "In one sentence, summarise the following log:\nAlice met Bob at 9:00. They discussed primes 2, 3, 5, 7 and M\u00f6bius transforms.",
+    "response": "Alice and Bob met at 9:00 to discuss primes and M\u00f6bius transforms.",
+    "ok": null,
+    "latency_s": 1.106
+  },
+  {
+    "id": "recall_1",
+    "prompt": "Recall the meeting time and the smallest prime they discussed. Only output in this exact format: TIME=<time>; PRIME=<n>.",
+    "response": "TIME=9:00; PRIME=2",
+    "ok": true,
+    "latency_s": 2.922
+  }
+]

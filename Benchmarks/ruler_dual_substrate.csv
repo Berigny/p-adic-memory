@@ -1,0 +1,5 @@
+noise_pairs,response,ok,latency_s
+1000,TIME=9:00; PRIME=2,True,2.602
+4000,TIME=9:00; PRIME=2,True,3.716
+8000,TIME=9:00; PRIME=2,True,3.291
+16000,TIME=9:00; PRIME=2,True,4.922
