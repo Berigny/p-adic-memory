@@ -39,6 +39,8 @@ Together, they build a **hierarchical, ultrametric memory tree** — giving LLMs
 **LongBench:** maintained exact recall under noise and long-context stress.
 **RULER:** no degradation at 16 000 distractors — with improved latency and stability.
 
+👉 [LongBench + RULER Benchmarks Outputs](https://github.com/Berigny/p-adic-memory/tree/main/Benchmarks)
+
 👉 [Interactive A/B demo](https://berigny-p-adic-memory-versus-4cqpap.streamlit.app)
 
 ---
