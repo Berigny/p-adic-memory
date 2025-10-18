@@ -57,6 +57,8 @@ Using a simulation of ethical dilemmas, the dual-substrate framework demonstrate
 
 This shows how prime-anchored memory can underpin **value-sensitive, thermodynamically efficient decision-making** — critical for autonomous agents.
 
+👉 [Ethics Recursive Reasoning Topology](https://github.com/Berigny/p-adic-memory/blob/main/Recursive_ethics_reasoning.ipynb
+
 ---
 
 ## Quick start
